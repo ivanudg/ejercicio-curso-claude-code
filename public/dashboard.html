@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kōhi — Mi lugar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0806; --surface: #13100d; --border: #2c241a; --text: #ede8df; --muted: #8a7c6e; --accent: #c8a04a; --error: #d96b6b; }
+    body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-weight: 300; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+    .logo { font-family: 'Noto Serif JP', serif; font-size: 1.3rem; font-weight: 300; color: var(--text); text-decoration: none; letter-spacing: 0.08em; }
+    .logo span { color: var(--accent); }
+    .logout-btn { font-family: 'Noto Sans JP', sans-serif; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 2px; padding: 0.4rem 0.9rem; cursor: pointer; transition: all 0.2s; }
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+    main { max-width: 560px; margin: 0 auto; padding: 3rem 2rem; }
+    #loading { text-align: center; padding: 4rem 0; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.15em; }
+    .greeting-label { font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .greeting-name { font-family: 'Noto Serif JP', serif; font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 300; color: var(--text); margin-bottom: 0.4rem; }
+    .greeting-sub { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.08em; }
+    .greeting-sub strong { color: var(--accent); font-weight: 400; }
+    .divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0; }
+    .pos-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 1.75rem 1.5rem; margin-bottom: 1.25rem; }
+    .pos-label { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .pos-numbers { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .pos-hash { font-family: 'Noto Serif JP', serif; font-size: 0.9rem; color: var(--accent); font-weight: 300; }
+    .pos-num { font-family: 'Noto Serif JP', serif; font-size: 3.5rem; font-weight: 300; color: var(--text); line-height: 1; }
+    .pos-of { font-size: 0.85rem; color: var(--muted); }
+    .pos-total { color: var(--accent); }
+    .bar-label { display: flex; justify-content: space-between; font-size: 0.7rem; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 0.5rem; }
+    .bar-track { width: 100%; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #9e7d38, var(--accent)); border-radius: 99px; transition: width 1s ease; width: 0%; }
+    .qr-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 1.75rem 1.5rem; display: flex; align-items: center; gap: 1.75rem; }
+    .qr-label-section { flex: 1; }
+    .qr-section-title { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
+    .qr-desc { font-size: 0.82rem; line-height: 1.7; color: var(--muted); margin-bottom: 0.9rem; }
+    .qr-id-tag { display: inline-block; font-family: 'Courier New', monospace; font-size: 0.75rem; letter-spacing: 0.1em; color: var(--accent); background: rgba(200,160,74,0.08); border: 1px solid rgba(200,160,74,0.2); border-radius: 2px; padding: 0.2rem 0.55rem; }
+    .qr-graphic { flex-shrink: 0; width: 100px; height: 100px; background: #fff; border-radius: 2px; padding: 6px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 1.5px; }
+    .qr-cell { border-radius: 1px; }
+    .qr-cell.on  { background: #111; }
+    .qr-cell.off { background: #fff; }
+    .back-link { display: block; text-align: center; margin-top: 2.5rem; font-size: 0.75rem; color: var(--muted); text-decoration: none; letter-spacing: 0.12em; }
+    .back-link:hover { color: var(--accent); }
+    #content { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">K<span>ō</span>hi</a>
+    <button class="logout-btn" id="logout-btn">Cerrar sesión</button>
+  </header>
+  <main>
+    <div id="loading">Cargando…</div>
+    <div id="content">
+      <p class="greeting-label">Bienvenido de vuelta</p>
+      <h1 class="greeting-name" id="greeting-name">—</h1>
+      <p class="greeting-sub" id="greeting-sub">Tu lugar en Kōhi está reservado.</p>
+      <div class="divider"></div>
+      <div class="pos-card">
+        <p class="pos-label">Tu posición en la lista</p>
+        <div class="pos-numbers">
+          <span class="pos-hash">#</span>
+          <span class="pos-num" id="pos-num">—</span>
+          <span class="pos-of">de <span class="pos-total" id="pos-total">—</span> personas</span>
+        </div>
+        <div class="bar-label"><span>Primero en la fila</span><span id="pct-label">—%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+      </div>
+      <div class="qr-card">
+        <div class="qr-label-section">
+          <p class="qr-section-title">Código de acceso</p>
+          <p class="qr-desc">Presenta este código el día de la apertura para reclamar tu lugar.</p>
+          <span class="qr-id-tag" id="qr-id-tag">QR-…</span>
+        </div>
+        <div class="qr-graphic" id="qr-graphic"></div>
+      </div>
+      <a href="/" class="back-link">← Volver al inicio</a>
+    </div>
+  </main>
+  <script>
+    const token = localStorage.getItem('kohi_token');
+    if (!token) window.location.replace('/login.html');
+    document.getElementById('logout-btn').addEventListener('click', () => { localStorage.removeItem('kohi_token'); window.location.replace('/login.html'); });
+    function buildQR(seed) {
+      const grid = document.getElementById('qr-graphic');
+      let s = seed % 65536;
+      const rand = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s; };
+      const corners = new Set();
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) { corners.add(r * 10 + c); corners.add(r * 10 + (9 - c)); corners.add((9 - r) * 10 + c); }
+      for (let i = 0; i < 100; i++) { const cell = document.createElement('div'); cell.className = 'qr-cell ' + (corners.has(i) || rand() % 3 !== 0 ? 'on' : 'off'); grid.appendChild(cell); }
+    }
+    async function loadData() {
+      try {
+        const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401) { localStorage.removeItem('kohi_token'); window.location.replace('/login.html'); return; }
+        const data = await res.json();
+        document.getElementById('greeting-name').textContent = data.name;
+        document.getElementById('greeting-sub').innerHTML = `Eres el <strong>#${data.position}</strong> de <strong>${data.total}</strong> en la lista.`;
+        document.getElementById('pos-num').textContent = data.position;
+        document.getElementById('pos-total').textContent = data.total;
+        const pct = Math.max(1, Math.round((1 - (data.position - 1) / Math.max(data.total, 1)) * 100));
+        document.getElementById('pct-label').textContent = `${pct}%`;
+        setTimeout(() => { document.getElementById('bar-fill').style.width = `${pct}%`; }, 100);
+        document.getElementById('qr-id-tag').textContent = `QR-${String(data.position).padStart(4, '0')}`;
+        buildQR(data.position * 31 + 17);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } catch { document.getElementById('loading').textContent = 'Error al cargar los datos.'; }
+    }
+    loadData();
+  </script>
+</body>
+</html>

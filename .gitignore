@@ -1,0 +1,5 @@
+node_modules/
+kohi.db
+*.png
+.playwright-mcp/
+.env
